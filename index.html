@@ -16,7 +16,7 @@
             <div
               class="healthbar text-center"
               style="background-color: green; margin: 0; color: white"
-              :style="renderUserHP()"
+              :style="{width: userHp + '%'}"
             >
               {{ userHp }}
             </div>
@@ -28,7 +28,7 @@
             <div
               class="healthbar text-center"
               style="background-color: green; margin: 0; color: white"
-              :style="renderMonsterHP()"
+              :style="{width: monsterHp + '%'}"
             >
               {{ monsterHp }}
             </div>
@@ -43,15 +43,22 @@
       <section class="row controls" v-else="">
         <div class="small-12 columns">
           <button id="attack" @click="attack()">ATTACK</button>
-          <button id="special-attack" @click="specialAttack()">SPECIAL ATTACK</button>
+          <button id="special-attack" @click="specialAttack()">
+            SPECIAL ATTACK
+          </button>
           <button id="heal" @click="heal()">HEAL</button>
           <button id="give-up" @click="giveUp()">GIVE UP</button>
         </div>
       </section>
-      <section class="row log" v-if="logs.length !== 0">
+      <section class="row log" v-if="logs.length > 0">
         <div class="small-12 columns">
           <ul>
-            <li v-for="log in logs" :style="log.style">{{ log.message }}</li>
+            <li
+              v-for="log in logs"
+              :class="{'player-turn': log.isPlayer, 'monster-turn': !log.isPlayer}"
+            >
+              {{ log.message }}
+            </li>
           </ul>
         </div>
       </section>

@@ -1,7 +1,3 @@
-const rand = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
 new Vue({
   el: "#app",
   data: {
@@ -17,77 +13,76 @@ new Vue({
       this.logs = [];
       this.started = true;
     },
-    renderUserHP: function () {
-      return {
-        width: this.userHp + "%",
-      };
-    },
-    renderMonsterHP: function () {
-      return {
-        width: this.monsterHp + "%",
-      };
-    },
     attack: function () {
-      const damageDone = rand(5, 10);
-      const damageTaken = rand(5, 12);
+      const damageDone = this.calculateDamage(3, 10);
       this.monsterHp -= damageDone;
-      this.userHp -= damageTaken;
-      this.logs.push({
-        style: {
-          color: "blue",
-          backgroundColor: "lavender",
-        },
+      this.logs.unshift({
+        isPlayer: true,
         message: `PLAYER HITS MONSTER FOR ${damageDone}`,
       });
-      this.logs.push({
-        style: {
-          color: "red",
-          backgroundColor: "pink",
-        },
-        message: `MONSTER HITS PLAYER FOR ${damageTaken}`,
-      });
+      if (this.checkWin()) {
+        return;
+      }
+      this.monsterAttacks();
+      this.checkWin();
     },
     specialAttack: function () {
-      const damageDone = rand(15, 20);
-      const damageTaken = rand(5, 12);
+      const damageDone = this.calculateDamage(10, 20);
       this.monsterHp -= damageDone;
-      this.userHp -= damageTaken;
-      this.logs.push({
-        style: {
-          color: "blue",
-          backgroundColor: "lavender",
-        },
-        message: `PLAYER HITS MONSTER FOR ${damageDone}`,
+      this.logs.unshift({
+        isPlayer: true,
+        message: `PLAYER HITS MONSTER HARD FOR ${damageDone}`,
       });
-      this.logs.push({
-        style: {
-          color: "red",
-          backgroundColor: "pink",
-        },
-        message: `MONSTER HITS PLAYER FOR ${damageTaken}`,
-      });
+      if (this.checkWin()) {
+        return;
+      }
+      this.monsterAttacks();
+      this.checkWin();
     },
     heal: function () {
-      const damageTaken = rand(5, 12);
-      this.userHp += 10;
-      this.userHp -= damageTaken;
-      this.logs.push({
-        style: {
-          color: "blue",
-          backgroundColor: "lavender",
-        },
-        message: `PLAYER HEALS HIMSELF FOR 10`,
+      if (this.userHp <= 90) {
+        this.userHp += 10;
+      } else {
+        this.userHp = 100;
+      }
+      this.logs.unshift({
+        isPlayer: true,
+        message: `PLAYER HEALS FOR 10`,
       });
-      this.logs.push({
-        style: {
-          color: "red",
-          backgroundColor: "pink",
-        },
-        message: `MONSTER HITS PLAYER FOR ${damageTaken}`,
-      });
+      this.monsterAttacks();
     },
     giveUp: function () {
       this.started = false;
+    },
+    monsterAttacks: function () {
+      const damageTaken = this.calculateDamage(5, 12);
+      this.userHp -= damageTaken;
+      this.checkWin();
+      this.logs.unshift({
+        isPlayer: false,
+        message: `MONSTER HITS PLAYER FOR ${damageTaken}`,
+      });
+    },
+    calculateDamage: function (min, max) {
+      return Math.max(Math.floor(Math.random() * max) + 1, min);
+    },
+    checkWin: function () {
+      if (this.monsterHp <= 0) {
+        if (confirm("You won! New Game?")) {
+          this.start();
+        } else {
+          this.started = false;
+        }
+        return true;
+      } else if (this.userHp <= 0) {
+        if (confirm("You lost! New Game?")) {
+          this.start();
+        } else {
+          this.started = false;
+        }
+        return true;
+      }
+      return false;
     },
   },
 });
